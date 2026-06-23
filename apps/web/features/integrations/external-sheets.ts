@@ -75,20 +75,20 @@ export async function applyExternalSheetOperations(input: {
   const operations: ExternalSheetOperationResult[] = [];
 
   const legacyPath = join(input.workDir, RUNTIME_OUTPUT_EXTERNAL_SHEETS_RELATIVE_PATH);
-  if (existsSync(legacyPath)) {
+  if (existsSync(/*turbopackIgnore: true*/ legacyPath)) {
     warnings.push(
       `${RUNTIME_OUTPUT_EXTERNAL_SHEETS_RELATIVE_PATH} 已弃用：Web 后端不再代执行 gws。请在 Agent runtime 直接运行 gws，并用 agent-space output sheets-result add 生成 ${RUNTIME_OUTPUT_EXTERNAL_SHEETS_RESULTS_RELATIVE_PATH}。`,
     );
   }
 
   const manifestPath = join(input.workDir, RUNTIME_OUTPUT_EXTERNAL_SHEETS_RESULTS_RELATIVE_PATH);
-  if (!existsSync(manifestPath)) {
+  if (!existsSync(/*turbopackIgnore: true*/ manifestPath)) {
     return { warnings, statusMessages, operations };
   }
 
   let parsed: unknown;
   try {
-    const raw = readFileSync(manifestPath, "utf8");
+    const raw = readFileSync(/*turbopackIgnore: true*/ manifestPath, "utf8");
     if (containsSensitiveTokenMaterial(raw)) {
       return {
         warnings: [`${RUNTIME_OUTPUT_EXTERNAL_SHEETS_RESULTS_RELATIVE_PATH} 含有疑似 Google Workspace token，已拒绝回收。`, ...warnings],
@@ -303,16 +303,16 @@ function persistResultArtifact(input: {
     throw new Error(`resultPath must be under ${RUNTIME_OUTPUT_ARTIFACTS_PREFIX}: ${input.resultPath}`);
   }
   const sourcePath = resolve(input.workDir, normalized);
-  if (!existsSync(sourcePath)) {
+  if (!existsSync(/*turbopackIgnore: true*/ sourcePath)) {
     throw new Error(`result artifact does not exist: ${normalized}`);
   }
-  const raw = readFileSync(sourcePath, "utf8");
+  const raw = readFileSync(/*turbopackIgnore: true*/ sourcePath, "utf8");
   if (containsSensitiveTokenMaterial(raw)) {
     throw new Error(`result artifact contains suspected token material: ${normalized}`);
   }
   JSON.parse(raw);
 
-  const stats = statSync(sourcePath);
+  const stats = statSync(/*turbopackIgnore: true*/ sourcePath);
   if (!stats.isFile() || stats.size <= 0) {
     throw new Error(`result artifact must be a non-empty JSON file: ${normalized}`);
   }
@@ -323,9 +323,9 @@ function persistResultArtifact(input: {
     "external-sheet-results",
     sanitizeStorageSegment(input.taskId ?? "manual"),
   );
-  mkdirSync(artifactDir, { recursive: true });
+  mkdirSync(/*turbopackIgnore: true*/ artifactDir, { recursive: true });
   const storedPath = join(artifactDir, `${String(input.index + 1).padStart(2, "0")}-${sanitizeStorageSegment(fileName)}`);
-  copyFileSync(sourcePath, storedPath);
+  copyFileSync(/*turbopackIgnore: true*/ sourcePath, /*turbopackIgnore: true*/ storedPath);
   return { storedPath, fileName, sizeBytes: stats.size };
 }
 
