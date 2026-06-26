@@ -680,7 +680,8 @@ textarea:focus {
 }
 
 .auth-actions--stack .auth-button,
-.auth-actions--stack .auth-google-button {
+.auth-actions--stack .auth-google-button,
+.auth-actions--stack .auth-feishu-button {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -730,6 +731,21 @@ textarea:focus {
 
 .auth-google-button:active {
   background: rgba(233, 222, 206, 0.84);
+}
+
+.auth-feishu-button {
+  border-color: rgba(44, 37, 31, 0.12);
+  background: rgba(61, 133, 198, 0.08);
+  color: var(--text);
+  min-height: 44px;
+}
+
+.auth-feishu-button:hover {
+  background: rgba(61, 133, 198, 0.16);
+}
+
+.auth-feishu-button:active {
+  background: rgba(61, 133, 198, 0.24);
 }
 
 .auth-status-hero {
@@ -18686,7 +18702,8 @@ textarea:focus {
 }
 
 .auth-shell--entry .auth-button,
-.auth-shell--entry .auth-google-button {
+.auth-shell--entry .auth-google-button,
+.auth-shell--entry .auth-feishu-button {
   min-height: 2.9rem;
   border-radius: 8px;
   font-family: "Cabin", var(--font-body), sans-serif;
@@ -18898,6 +18915,7 @@ textarea:focus {
 @media (prefers-reduced-motion: reduce) {
   .auth-shell--entry .auth-button,
   .auth-shell--entry .auth-google-button,
+  .auth-shell--entry .auth-feishu-button,
   .auth-shell--entry .auth-tabs__item {
     transition: none;
   }

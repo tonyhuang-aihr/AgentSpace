@@ -500,6 +500,20 @@ export function AuthScreen({
               >
                 {story.googleLabel}
               </a>
+              {showFeishuButton ? (
+                <a
+                  aria-disabled={isPending ? "true" : undefined}
+                  className="workspace-ghost-button auth-feishu-button"
+                  href={feishuStartUrl}
+                  onClick={(event) => {
+                    if (isPending) {
+                      event.preventDefault();
+                    }
+                  }}
+                >
+                  {story.feishuLabel}
+                </a>
+              ) : null}
               {feedback.tone === "error" ? (
                 <p className="auth-feedback" role="alert">
                   {feedback.message}
@@ -741,6 +755,7 @@ function buildAuthStory({
         ? tx("创建账号并加入工作区", "Create account and join workspace")
         : tx("登录并进入工作区", "Sign in and enter workspace"),
       googleLabel: tx("使用 Google 进入工作区", "Continue with Google to join workspace"),
+      feishuLabel: tx("使用飞书进入工作区", "Continue with Feishu to join workspace"),
     };
   }
 
@@ -775,6 +790,7 @@ function buildAuthStory({
       ),
       submitLabel: tx("创建账号并打开工作台", "Create account and open workspace"),
       googleLabel: tx("使用 Google 创建账号", "Continue with Google to create an account"),
+      feishuLabel: tx("使用飞书创建账号", "Continue with Feishu to create an account"),
     };
   }
 
@@ -809,5 +825,6 @@ function buildAuthStory({
     ),
     submitLabel: tx("登录进入工作台", "Sign in to workspace"),
     googleLabel: tx("使用 Google 登录", "Continue with Google"),
+      feishuLabel: tx("使用飞书登录", "Continue with Feishu"),
   };
 }
