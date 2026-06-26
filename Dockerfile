@@ -1,11 +1,16 @@
 # ===== AgentSpace Dockerfile for Railway =====
-FROM node:24-slim AS builder
+# Single-stage build (monorepo node_modules with symlinks can't cross COPY --from)
+
+FROM node:24-slim
 WORKDIR /app
+
+# Install PostgreSQL client for DB init
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
 
 # Copy all source
 COPY . .
 
-# Setup all workspace dependencies
+# Setup workspace dependencies
 RUN npm run setup
 
 # Build daemon package (required by web)
@@ -14,23 +19,12 @@ RUN npm --prefix packages/daemon run build
 # Build Next.js web app
 RUN npm --prefix apps/web run build
 
-# ---- Stage 2: Production ----
-FROM node:24-slim AS runner
-WORKDIR /app
+# Prune dev dependencies to reduce image size
+RUN npm prune --production 2>/dev/null || true
 
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-# Copy everything needed for production
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/apps/web ./apps/web
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/node_modules ./node_modules
-
-# Create attachment storage directory and start script
+# Create attachment storage and start script
 RUN mkdir -p /var/lib/agentspace/workspaces
 
-# Write start script
 RUN echo '#!/bin/sh\n\
 set -e\n\
 echo "=== AgentSpace Starting ==="\n\
