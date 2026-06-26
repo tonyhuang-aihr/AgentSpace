@@ -54,7 +54,7 @@ export interface StoredUserRecord {
 }
 
 /** An identity from an external auth provider (e.g. Google) */
-export type AuthProvider = "google" | "password" | "email";
+export type AuthProvider = "google" | "feishu" | "password" | "email";
 
 export interface StoredAuthIdentityRecord {
   id: string;

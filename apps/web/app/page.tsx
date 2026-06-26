@@ -3,6 +3,7 @@ import { AuthScreen } from "@/features/auth/auth-screen";
 import { buildGoogleStartUrl, readPublicAppUrl } from "@/features/auth/public-app-url";
 import { getCurrentWorkspaceContext } from "@/features/auth/server-workspace";
 import { hasRegisteredUsersSync } from "@/features/auth/server-auth";
+import { isFeishuOAuthConfigured } from "@/features/auth/feishu-oauth";
 import { buildWorkspacePath } from "@/features/auth/workspace-paths";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,7 @@ export default async function HomePage({
   return (
     <AuthScreen
       googleStartUrl={buildGoogleStartUrl(readPublicAppUrl())}
+      feishuStartUrl={isFeishuOAuthConfigured() ? "/api/auth/feishu/start" : undefined}
       hasUsers={hasRegisteredUsersSync()}
       initialError={authError}
       initialWorkspaceJoinCode={workspaceJoinCode}

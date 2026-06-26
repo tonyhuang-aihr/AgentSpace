@@ -71,6 +71,7 @@ export function AuthScreen({
 }: {
   hasUsers: boolean;
   googleStartUrl?: string;
+  feishuStartUrl?: string;
   initialError?: string;
   initialWorkspaceJoinCode?: string;
   invitation?: InvitationContext;
@@ -93,6 +94,11 @@ export function AuthScreen({
     ? `/api/auth/google/start?invitationToken=${encodeURIComponent(invitation.token)}`
     : "/api/auth/google/start");
   const googleStartUrl = buildGoogleStartUrlWithJoinCode(googleStartUrlBase, invitation ? undefined : workspaceJoinCode);
+  const feishuStartUrlBase = (invitation
+    ? `/api/auth/feishu/start?invitationToken=${encodeURIComponent(invitation.token)}`
+    : "/api/auth/feishu/start");
+  const feishuStartUrl = buildGoogleStartUrlWithJoinCode(feishuStartUrlBase, invitation ? undefined : workspaceJoinCode);
+  const showFeishuButton = Boolean(feishuStartUrl);
 
   function handleSubmit(formData: FormData): void {
     setFeedback({ tone: "idle" });

@@ -207,6 +207,93 @@ export async function createSessionForGoogleLogin(input: {
   return toPublicUser(updatedUser);
 }
 
+
+
+export async function createSessionForFeishuLogin(input: {
+  providerSubject: string;
+  email: string;
+  emailVerified: boolean;
+  displayName: string;
+  avatarUrl?: string;
+  invitationToken?: string;
+  joinCode?: string;
+}): Promise<AuthUser> {
+  const normalizedEmail = input.email.trim().toLowerCase();
+  if (!normalizedEmail) {
+    throw new Error("auth.feishu_profile_missing_email");
+  }
+
+  const existingIdentity = readAuthIdentityByProviderSubjectSync("feishu", input.providerSubject);
+  const user = existingIdentity ? readUserSync(existingIdentity.userId) : null;
+
+  if (!user) {
+    // New user - auto-register (Feishu users are corporate, so we trust them)
+    const newUser = createUserSync({
+      displayName: input.displayName,
+      primaryEmail: normalizedEmail,
+      avatarUrl: input.avatarUrl,
+    });
+    createAuthIdentitySync({
+      userId: newUser.id,
+      provider: "feishu",
+      providerSubject: input.providerSubject,
+      email: normalizedEmail,
+      emailVerified: input.emailVerified,
+      profileJson: JSON.stringify({ avatarUrl: input.avatarUrl ?? null }),
+    });
+    const ownedWorkspace = createOwnedWorkspaceForUserSync({
+      userId: newUser.id,
+      displayName: input.displayName,
+    });
+    tryRecordWorkspaceAuditEventSync({
+      workspaceId: ownedWorkspace.workspace.id,
+      title: "Workspace registered",
+      note: `${input.displayName} created workspace via Feishu login.`,
+      code: "auth.feishu_registration_succeeded",
+      data: {
+        actorType: "session_user",
+        resourceType: "workspace",
+        resourceId: ownedWorkspace.workspace.id,
+      },
+    });
+    await writeWorkspaceSelectionCookie(ownedWorkspace.workspace.slug);
+
+    // Handle invitation/join code
+    if (input.invitationToken) {
+      await acceptWorkspaceInvitationForUser({
+        token: input.invitationToken,
+        userId: newUser.id,
+        actorDisplayName: newUser.displayName,
+      });
+    }
+    if (input.joinCode) {
+      await joinWorkspaceByCodeForUser({
+        joinCode: input.joinCode,
+        userId: newUser.id,
+        actorDisplayName: newUser.displayName,
+      });
+    }
+
+    await setSessionCookieForUser(newUser.id);
+    return toPublicUser(newUser);
+  }
+
+  // Existing user - update and login
+  const updatedUser = updateUserSync({
+    userId: user.id,
+    primaryEmail: normalizedEmail,
+    avatarUrl: input.avatarUrl,
+  }) ?? user;
+
+  await setSessionCookieForUser(updatedUser.id);
+  tryRecordUserWorkspaceAuditEventSync(updatedUser.id, {
+    title: "Feishu login succeeded",
+    note: `${updatedUser.displayName} signed in with Feishu.`,
+    code: "auth.feishu_login_succeeded",
+  });
+  return toPublicUser(updatedUser);
+}
+
 export async function completePendingGoogleRegistration(input: {
   displayName: string;
   workspaceName: string;
