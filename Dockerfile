@@ -25,22 +25,35 @@ RUN npm prune --production 2>/dev/null || true
 # Create attachment storage directory
 RUN mkdir -p /var/lib/agentspace/workspaces
 
-# Write start script
-RUN printf '#!/bin/sh\n\
-set -e\n\
-echo "=== AgentSpace Starting ==="\n\
-echo "Waiting for PostgreSQL..."\n\
-until node -e "const pg=require(\\"/app/packages/db/node_modules/pg\\");const c=new pg.Client(process.env.SELF_HOSTED_DATABASE_URL||process.env.DATABASE_URL);c.connect().then(()=>{c.end();process.exit(0)}).catch(()=>process.exit(1));" 2>/dev/null; do\n\
-  echo "PostgreSQL not ready, retrying in 2s..."\n\
-  sleep 2\n\
-done\n\
-echo "PostgreSQL connected!"\n\
-echo "Ensuring database schema..."\n\
-cd /app\n\
-node --experimental-strip-types packages/db/src/postgres-cli.ts init --database-url "${SELF_HOSTED_DATABASE_URL:-$DATABASE_URL}" 2>/dev/null || echo "DB schema may already exist, continuing..."\n\
-echo "Starting AgentSpace on port ${PORT:-1455}..."\n\
-cd /app/apps/web\n\
-exec npx next start --hostname 0.0.0.0 --port "${PORT:-1455}"\n' > /app/start.sh && chmod +x /app/start.sh
+# Write start script using heredoc
+RUN cat > /app/start.sh << 'EOF'
+#!/bin/sh
+set -e
+echo "=== AgentSpace Starting ==="
+
+# Wait for PostgreSQL
+echo "Waiting for PostgreSQL..."
+until node -e "
+  const pg = require('/app/packages/db/node_modules/pg');
+  const client = new pg.Client(process.env.SELF_HOSTED_DATABASE_URL || process.env.DATABASE_URL);
+  client.connect().then(function() { client.end(); process.exit(0); }).catch(function() { process.exit(1); });
+" 2>/dev/null; do
+  echo "PostgreSQL not ready, retrying in 2s..."
+  sleep 2
+done
+echo "PostgreSQL connected!"
+
+# Initialize DB schema if needed
+echo "Ensuring database schema..."
+cd /app
+node --experimental-strip-types packages/db/src/postgres-cli.ts init --database-url "${SELF_HOSTED_DATABASE_URL:-$DATABASE_URL}" 2>/dev/null || echo "DB schema may already exist, continuing..."
+
+# Start Next.js
+echo "Starting AgentSpace on port ${PORT:-1455}..."
+cd /app/apps/web
+exec npx next start --hostname 0.0.0.0 --port "${PORT:-1455}"
+EOF
+RUN chmod +x /app/start.sh
 
 EXPOSE 1455
 
