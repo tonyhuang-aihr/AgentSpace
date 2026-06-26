@@ -1,0 +1,16 @@
+export declare const DEFAULT_HEARTBEAT_INTERVAL_MS = 15000;
+export declare const DEFAULT_TASK_POLL_INTERVAL_MS = 3000;
+export declare const DEFAULT_LOG_LINES = 50;
+export declare const DEFAULT_STATE_DIR_NAME = ".agent-space-daemon";
+export declare function resolveDefaultDaemonStateDir(environment?: NodeJS.ProcessEnv): string;
+export declare function ensureDaemonStateDir(stateDir: string): string;
+export declare function openDaemonLogFile(logPath: string): number;
+export declare function getDaemonPidFilePath(stateDir: string): string;
+export declare function getDaemonLogFilePath(stateDir: string): string;
+export declare function readPidIfRunning(pidPath: string): number | null;
+export declare function cleanupStalePidFile(pidPath: string): void;
+export declare function isProcessRunning(pid: number): boolean;
+export declare function readLastLines(filePath: string, lines: number): string[];
+export declare function renderDaemonSummary(summary: object): string;
+export declare function getStandaloneCliEntryPath(): string;
+export declare function resolveLogFileSize(logPath: string): number;

@@ -1,0 +1,10 @@
+import type { TaskRecord } from "@agent-space/domain/workspace";
+export declare function listStoredTasksSync(workspaceId?: string): TaskRecord[];
+export declare function readStoredTaskSync(taskId: string, workspaceId?: string): TaskRecord | null;
+export declare function createStoredTaskSync(task: TaskRecord, workspaceId?: string): TaskRecord;
+export declare function updateStoredTaskSync(taskId: string, next: TaskRecord, workspaceId?: string): TaskRecord | null;
+export declare function deleteStoredTaskSync(taskId: string, workspaceId?: string): boolean;
+export declare function deleteStoredTasksForChannelSync(channelName: string, workspaceId?: string): void;
+export declare function deleteStoredTasksForAssigneeSync(employeeName: string, workspaceId?: string): void;
+export declare function renameStoredTasksChannelSync(channelName: string, nextName: string, workspaceId?: string): void;
+export declare function replaceStoredTasksSync(tasks: TaskRecord[], workspaceId?: string): void;

@@ -1,0 +1,68 @@
+import type { AgentSpaceState, DirectConversationState, MessageAttachment, MessageMention, WorkspaceMessage } from "@agent-space/domain/workspace";
+import type { ChannelDocumentRunStep } from "@agent-space/domain";
+import type { MentionCandidate } from "@agent-space/domain";
+export declare function pushWorkspaceMessageIfChannel(state: AgentSpaceState, channel: string | undefined, input: {
+    speaker: string;
+    speakerUserId?: string;
+    role: "human" | "agent";
+    summary: string;
+    code?: string;
+    data?: Record<string, string>;
+    attachments?: MessageAttachment[];
+    mentions?: MessageMention[];
+}, workspaceId?: string): void;
+export declare function pushWorkspaceMessageToChannel(state: AgentSpaceState, channel: string, input: {
+    speaker: string;
+    speakerUserId?: string;
+    role: "human" | "agent";
+    summary: string;
+    code?: string;
+    data?: Record<string, string>;
+    status?: "pending" | "completed" | "error";
+    attachments?: MessageAttachment[];
+    mentions?: MessageMention[];
+    replyToMessageId?: string;
+}, workspaceId?: string): WorkspaceMessage;
+export declare function createWorkspaceMessageRecord(input: {
+    channel?: string;
+    speaker: string;
+    speakerUserId?: string;
+    role: "human" | "agent";
+    summary: string;
+    code?: string;
+    data?: Record<string, string>;
+    status?: "pending" | "completed" | "error";
+    attachments?: MessageAttachment[];
+    mentions?: MessageMention[];
+    replyToMessageId?: string;
+}): WorkspaceMessage;
+export declare function buildMentionCandidates(state: AgentSpaceState, channelName: string): MentionCandidate[];
+export declare function buildChannelHistorySnapshot(state: AgentSpaceState, channelName: string): Array<{
+    speaker: string;
+    role?: string;
+    summary: string;
+    time?: string;
+    status?: string;
+    kind?: string;
+    processType?: string;
+    mentions: string[];
+    attachments: string[];
+}>;
+export declare function enqueueChannelMentionStepSync(state: AgentSpaceState, input: {
+    channelName: string;
+    sourceMessage?: WorkspaceMessage;
+    fullMessage: string;
+    attachments?: MessageAttachment[];
+    step: ChannelDocumentRunStep;
+    mentionedAgentIds: string[];
+    mentionedAgentLabels: string[];
+    handoffDocumentIds?: string[];
+    handoffDocumentVersionIds?: string[];
+    workspaceId?: string;
+    requesterUserId?: string;
+    requesterDisplayName?: string;
+}): boolean;
+export declare function getChannelHistoryFilePath(channelName: string, workspaceId?: string): string;
+export declare function renameChannelHistoryFile(previousName: string, nextName: string, workspaceId?: string): void;
+export declare function removeChannelHistoryFile(channelName: string, workspaceId?: string): void;
+export declare function sortDirectConversations(threads: DirectConversationState[]): DirectConversationState[];
