@@ -83,6 +83,17 @@ function postResponse(response) {
   Atomics.notify(responseSignal, 0, 1);
 }
 
+function shouldUseSsl(databaseUrl) {
+  try {
+    var parsed = new URL(databaseUrl);
+    var sslMode = parsed.searchParams.get("sslmode");
+    var ssl = parsed.searchParams.get("ssl");
+    return sslMode === "require" || sslMode === "verify-ca" || sslMode === "verify-full" || ssl === "true" || ssl === "1";
+  } catch (e) {
+    return false;
+  }
+}
+
 async function ensureClient(databaseUrl) {
   if (client && connectedDatabaseUrl === databaseUrl) {
     return client;
@@ -91,6 +102,7 @@ async function ensureClient(databaseUrl) {
   await closeClient();
   client = new Client({
     connectionString: databaseUrl,
+    ssl: shouldUseSsl(databaseUrl) ? { rejectUnauthorized: false } : undefined,
   });
   await client.connect();
   connectedDatabaseUrl = databaseUrl;
