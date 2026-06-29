@@ -1,0 +1,31 @@
+FROM node:24-slim
+
+# Install curl for healthcheck and opencode install script
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# Install opencode-ai globally
+RUN npm install -g opencode-ai
+
+# Install agent-space-daemon from pre-built tarball
+COPY deploy/agent-space-daemon-0.1.3.tgz /tmp/
+RUN npm install -g /tmp/agent-space-daemon-0.1.3.tgz && rm /tmp/agent-space-daemon-0.1.3.tgz
+
+# Verify installations
+RUN opencode --version 2>/dev/null; agent-space-daemon --version 2>/dev/null || true
+
+# Create opencode config directory and DeepSeek provider config
+RUN mkdir -p /root/.config/opencode /root/.local/share/opencode
+COPY deploy/daemon-opencode.json /root/.config/opencode/opencode.json
+
+# Create workspaces directory for agent tasks
+RUN mkdir -p /var/lib/agentspace/workspaces
+
+# Copy start script
+COPY deploy/daemon-start.sh /app/daemon-start.sh
+RUN chmod +x /app/daemon-start.sh
+
+# Default env vars (overridden by Railway)
+ENV AGENT_SPACE_DAEMON_HOME=/root/.agent-space-daemon
+ENV AGENT_SPACE_DAEMON_STATE_DIR=/root/.agent-space-daemon
+
+CMD ["/app/daemon-start.sh"]
