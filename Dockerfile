@@ -1,5 +1,5 @@
 # ===== AgentSpace Dockerfile for Railway =====
-# Single-stage build - keep it simple
+# Single-stage build - optimized for 1GB RAM
 
 FROM node:24-slim
 WORKDIR /app
@@ -13,7 +13,7 @@ RUN npm run setup
 # Build daemon package (required by web)
 RUN npm --prefix packages/daemon run build
 
-# Build Next.js web app
+# Build Next.js web app (standalone output reduces runtime footprint)
 RUN npm --prefix apps/web run build
 
 # Create attachment storage directory

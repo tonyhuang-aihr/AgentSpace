@@ -2,6 +2,12 @@
 set -e
 echo "=== AgentSpace Starting ==="
 
+# Limit Node.js heap to 700MB to avoid OOM on 1GB container
+export NODE_OPTIONS="${NODE_OPTIONS} --max-old-space-size=700"
+
+# Set PG connection timeouts for Neon (cold start can take 3s)
+export PGCONNECT_TIMEOUT=10
+
 # Initialize DB schema if needed (best-effort, don't block startup)
 echo "Initializing database schema..."
 cd /app

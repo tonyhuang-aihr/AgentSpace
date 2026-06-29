@@ -6,6 +6,7 @@ const repositoryRoot = join(projectDir, "..", "..");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   allowedDevOrigins: ["hire-an-agent.online", "127.0.0.1", "localhost"],
   devIndicators: false,
   reactStrictMode: true,
